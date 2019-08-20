@@ -9,7 +9,7 @@ V['CBO'] = {
 
 P['CBO'] = {
 	['player'] = {
-		['overlay'] = true,
+		['overlay'] = false,
 		["overlayOnFrame"] = "POWER",
 		['hidetext'] = false,
 		['xOffsetText'] = 4,
@@ -18,7 +18,7 @@ P['CBO'] = {
 		['yOffsetTime'] = 0,
 	},
 	['target'] = {
-		['overlay'] = true,
+		['overlay'] = false,
 		["overlayOnFrame"] = "POWER",
 		['hidetext'] = false,
 		['xOffsetText'] = 4,
@@ -27,7 +27,7 @@ P['CBO'] = {
 		['yOffsetTime'] = 0,
 	},
 	['focus'] = {
-		['overlay'] = true,
+		['overlay'] = false,
 		["overlayOnFrame"] = "POWER",
 		['hidetext'] = false,
 		['xOffsetText'] = 4,
@@ -36,7 +36,7 @@ P['CBO'] = {
 		['yOffsetTime'] = 0,
 	},
 	['pet'] = {
-		['overlay'] = true,
+		['overlay'] = false,
 		["overlayOnFrame"] = "POWER",
 		['hidetext'] = false,
 		['xOffsetText'] = 4,
@@ -45,7 +45,7 @@ P['CBO'] = {
 		['yOffsetTime'] = 0,
 	},
 	['boss'] = {
-		['overlay'] = true,
+		['overlay'] = false,
 		["overlayOnFrame"] = "POWER",
 		['hidetext'] = false,
 		['xOffsetText'] = 4,
@@ -54,7 +54,7 @@ P['CBO'] = {
 		['yOffsetTime'] = 0,
 	},
 	['arena'] = {
-		['overlay'] = true,
+		['overlay'] = false,
 		["overlayOnFrame"] = "POWER",
 		['hidetext'] = false,
 		['xOffsetText'] = 4,
@@ -65,15 +65,6 @@ P['CBO'] = {
 }
 
 function CBO:InsertOptions()
-	if not E.Options.args.blazeplugins then
-		E.Options.args.blazeplugins = {
-			order = -2,
-			type = 'group',
-			name = 'Plugins (by Blazeflack)',
-			args = {},
-		}
-	end
-	
 	local function CreateOptionsGroup(order, name, unit, updateFunc)
 		local group = {
 			order = order,
@@ -174,29 +165,29 @@ function CBO:InsertOptions()
 				},
 			},
 		}
-		
+
 		return group
 	end
 
-	E.Options.args.blazeplugins.args.CBO = {
-		order = 10,
+	E.Options.args.plugins.args.CBO = {
 		type = 'group',
 		name = 'CastBarOverlay',
 		childGroups = 'tab',
 		disabled = function() return not E.private.unitframe.enable end,
 		args = {},
 	}
-	
-	local options = E.Options.args.blazeplugins.args.CBO.args
+
+	local options = E.Options.args.plugins.args.CBO.args
 	options.player = CreateOptionsGroup(1, L["Player"], "player", CBO.UpdateSettings)
 	options.target = CreateOptionsGroup(2, L["Target"], "target", CBO.UpdateSettings)
 	options.focus = CreateOptionsGroup(3, L["Focus"], "focus", CBO.UpdateSettings)
 	options.pet = CreateOptionsGroup(4, L["Pet"], "pet", CBO.UpdateSettings)
 	options.arena = CreateOptionsGroup(5, L["Arena"], "arena", CBO.UpdateSettings)
 	options.boss = CreateOptionsGroup(6, L["Boss"], "boss", CBO.UpdateSettings)
-
-	--Disable player overlay if CastBarSnap is enabled
-	E.Options.args.blazeplugins.args.CBO.args.player.args.overlay.disabled = function() return IsAddOnLoaded('ElvUI_CastBarSnap') end
 end
 
-E:RegisterModule(CBO:GetName())
+local function InitializeCallback()
+	CBO:Initialize()
+end
+
+E:RegisterModule(CBO:GetName(), InitializeCallback)

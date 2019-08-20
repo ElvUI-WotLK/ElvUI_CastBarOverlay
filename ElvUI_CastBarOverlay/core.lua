@@ -3,29 +3,9 @@ local CBO = E:GetModule("CastBarOverlay")
 local UF = E:GetModule("UnitFrames");
 local EP = LibStub("LibElvUIPlugin-1.0")
 local addon, ns = ...
-local CBS_Enabled = false
 
 --Cache global variables
 local _G = _G
-
--- Create compatibility warning popup
-E.PopupDialogs["CBOCompatibility"] = {
-	text = L["CBO_CONFLICT_WARNING"],
-	button1 = L["I understand"],
-	OnAccept = function() E.private.CBO.warned = true end,
-	timeout = 0,
-	whileDead = 1,
-	preferredIndex = 3,
-}
-
-E.PopupDialogs["CBO_CBPOWARNING"] = {
-	text = L["CBO_CBPOWARNING"],
-	button1 = L["I understand"],
-	OnAccept = function() DisableAddOn("ElvUI_CastBarPowerOverlay"); ReloadUI() end,
-	timeout = 0,
-	whileDead = 1,
-	preferredIndex = 3,
-}
 
 -- Warn about trying to overlay on disabled power bar
 E.PopupDialogs["CBO_PowerDisabled"] = {
@@ -63,13 +43,13 @@ local function SetCastbarSizeAndPosition(unit, unitframe, overlayFrame)
 	castbar:SetFrameStrata(frameStrata)
 	castbar:SetFrameLevel(frameLevel)
 
-	--Adjust size of castbar icon
-	castbar.ButtonIcon.bg:Size(overlayHeight + unitframe.BORDER*2)
-
 	-- Position the castbar on overLayFrame
 	if (not cdb.iconAttached) then
 		castbar:SetInside(overlayFrame, 0, 0)
 	else
+		--Adjust size of castbar icon
+		castbar.ButtonIcon.bg:Size(overlayHeight + unitframe.BORDER*2)
+
 		local iconWidth = cdb.icon and (castbar.ButtonIcon.bg:GetWidth() - unitframe.BORDER) or 0
 		castbar:ClearAllPoints()
 		if(unitframe.ORIENTATION == "RIGHT") then
@@ -157,7 +137,7 @@ local function ConfigureCastbar(unit, unitframe)
 
 	if db.overlay then
 		local OverlayFrame = db.overlayOnFrame == "HEALTH" and unitframe.Health or unitframe.Power
-		SetCastbarSizeAndPosition(unit, unitframe, OverlayFrame)
+		E:Delay(0.01, function() SetCastbarSizeAndPosition(unit, unitframe, OverlayFrame) end) --Delay it a bit, so size of overlayFrame is updated before we grab it.
 		ConfigureText(unit, castbar)
 	elseif castbar.isOverlayed then
 		ResetCastbarSizeAndPosition(unit, unitframe)
@@ -176,7 +156,7 @@ function CBO:UpdateSettings(unit)
 		E.db.CBO[unit].overlayOnFrame = "HEALTH"
 	end
 
-	if (unit == "player" and not CBS_Enabled) or unit == "target" or unit == "focus" or unit == "pet" then
+	if unit == "player" or unit == "target" or unit == "focus" or unit == "pet" then
 		local unitFrameName = "ElvUF_"..E:StringTitle(unit)
 		local unitframe = _G[unitFrameName]
 		ConfigureCastbar(unit, unitframe)
@@ -210,26 +190,9 @@ function CBO:Initialize()
 	--ElvUI UnitFrames are not enabled, stop right here!
 	if E.private.unitframe.enable ~= true then return end
 
-	if IsAddOnLoaded("ElvUI_CastBarSnap") then
-		CBS_Enabled = true
-		if not E.private.CBO.warned then
-			-- Warn user about CastBarPowerOverlay being disabled for Player CastBar
-			E:StaticPopup_Show("CBOCompatibility")
-		end
-		E.db.CBO.player.overlay = false
-	else
-		E.private.CBO.warned = false
-	end
-	
-	--Check if the old CastBarPowerOverlay is enabled
-	if IsAddOnLoaded("ElvUI_CastBarPowerOverlay") then
-		E:StaticPopup_Show("CBO_CBPOWARNING")
-	end
-
 	--Profile changed, update castbar overlay settings
 	hooksecurefunc(E, "UpdateAll", function()
-		--Delay it a bit to allow all db changes to take effect before we update
-		self:ScheduleTimer("UpdateAllCastbars", 0.5)
+		CBO:UpdateAllCastbars()
 	end)
 
 	--Castbar was modified, re-apply settings

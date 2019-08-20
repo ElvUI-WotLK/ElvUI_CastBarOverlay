@@ -1,14 +1,10 @@
 ## Interface: 30300
 ## Author: Blazeflack
-## Version: 1.03
+## Version: 1.09
 ## Title: |cff1784d1E|r|cffe5e3e3lvUI|r |cff1784d1C|r|cffe5e3e3ast|r |cff1784d1B|r|cffe5e3e3ar|r |cff1784d1O|r|cffe5e3e3verlay|r
 ## Notes: Allows you to overlay castbars on other frames.
 ## RequiredDeps: ElvUI
-## OptionalDeps: ElvUI_CastBarSnap
 
 locales.lua
 config.lua
 core.lua
-
-## X-Tukui-ProjectID: 294
-## X-Tukui-ProjectFolders: ElvUI_CastBarOverlay
